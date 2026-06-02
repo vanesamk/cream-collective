@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>The Cream Collective</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#fdfbf7">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="app" class="app-container">
+    <header class="header">
+      <h1 class="logo">The Cream Collective</h1>
+      <div id="status-indicator" class="status-indicator"></div>
+    </header>
+
+    <main id="main-content" class="main-content"></main>
+
+    <nav class="bottom-nav">
+      <a href="#catalog" class="nav-item" data-page="catalog">
+        <i data-lucide="plus-circle"></i>
+        <span>Catalog</span>
+      </a>
+      <a href="#inventory" class="nav-item" data-page="inventory">
+        <i data-lucide="package"></i>
+        <span>Inventory</span>
+      </a>
+      <a href="#pos" class="nav-item" data-page="pos">
+        <i data-lucide="shopping-cart"></i>
+        <span>POS</span>
+      </a>
+      <a href="#analytics" class="nav-item" data-page="analytics">
+        <i data-lucide="bar-chart-3"></i>
+        <span>Stats</span>
+      </a>
+    </nav>
+  </div>
+  <script type="module" src="/main.js"></script>
+</body>
+</html>
