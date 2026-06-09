@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const db = require('./db');
+require('dotenv').config();
 
 const app = express();
 app.use(cors());
@@ -13,6 +14,8 @@ const frontendDistPath = path.join(__dirname, '..', 'frontend', 'dist');
 app.use(express.static(frontendDistPath));
 
 const PORT = process.env.PORT || 3000;
+
+const STORE_PHONE = "+256774624210";
 
 // Helper to clean up expired reservations
 async function cleanupReservations() {
@@ -33,6 +36,84 @@ async function cleanupReservations() {
     WHERE status = 'active' AND expires_at < datetime('now')
   `);
 }
+
+// Store Info
+app.get('/api/store/info', (req, res) => {
+  res.json({
+    name: "The Cream Collective",
+    tagline: "Premium Curated Fashion — Kampala",
+    phone: STORE_PHONE,
+    whatsapp: `https://wa.me/${STORE_PHONE.replace('+', '')}`,
+    departments: ["Men", "Women", "Kids"],
+    payment_methods: ["MTN Mobile Money", "Cash"],
+    location: "Kampala, Uganda"
+  });
+});
+
+// Payment Methods
+app.get('/api/payments/methods', (req, res) => {
+  res.json({
+    methods: [
+      { name: "MTN Mobile Money", number: STORE_PHONE, type: "mobile_money" },
+      { name: "Cash", type: "cash" }
+    ]
+  });
+});
+
+// WhatsApp Link Generator
+app.get('/api/whatsapp/link/:item_id', (req, res) => {
+  const { item_id } = req.params;
+  const item = db.query(`SELECT * FROM items WHERE id = ${db.sanitize(item_id)}`);
+  
+  if (!item || item.length === 0) {
+    return res.status(404).json({ error: "Item not found" });
+  }
+
+  const { sku, category, price } = item[0];
+  const message = `Hi I'm interested in ${sku} - ${category} - ${parseInt(price).toLocaleString()} UGX`;
+  const link = `https://wa.me/${STORE_PHONE.replace('+', '')}?text=${encodeURIComponent(message)}`;
+  
+  res.json({ link });
+});
+
+// Payments (Manual Flow)
+app.post('/api/payments/mobile-money', async (req, res) => {
+  const { item_id, customer_phone } = req.body;
+  
+  const item = db.query(`SELECT price FROM items WHERE id = ${db.sanitize(item_id)}`);
+  if (!item || item.length === 0) return res.status(404).json({ error: "Item not found" });
+  
+  const amount = item[0].price;
+  const paymentId = uuidv4();
+  
+  const provider = (customer_phone.startsWith('25677') || customer_phone.startsWith('25678') || customer_phone.startsWith('25676')) ? 'mtn' : 'airtel';
+
+  // Create pending payment record
+  db.query(`
+    INSERT INTO payments (id, item_id, customer_phone, amount, provider, status)
+    VALUES (${db.sanitize(paymentId)}, ${db.sanitize(item_id)}, ${db.sanitize(customer_phone)}, ${db.sanitize(amount)}, ${db.sanitize(provider)}, 'pending')
+  `);
+
+  res.json({ 
+    payment_id: paymentId, 
+    status: 'pending',
+    message: 'Manual payment intent recorded'
+  });
+});
+
+app.get('/api/payments/:id', (req, res) => {
+  const { id } = req.params;
+  const payment = db.query(`SELECT * FROM payments WHERE id = ${db.sanitize(id)}`);
+  if (!payment || payment.length === 0) return res.status(404).json({ error: "Payment not found" });
+  res.json(payment[0]);
+});
+
+app.get('/api/payments/:id/status', (req, res) => {
+  const { id } = req.params;
+  const payment = db.query(`SELECT status FROM payments WHERE id = ${db.sanitize(id)}`);
+  if (!payment || payment.length === 0) return res.status(404).json({ error: "Payment not found" });
+  res.json({ status: payment[0].status });
+});
 
 // Bales
 app.get('/api/bales', (req, res) => {

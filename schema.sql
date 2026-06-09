@@ -48,6 +48,18 @@ CREATE TABLE reservations (
     status TEXT DEFAULT 'active' CHECK (status IN ('active', 'expired', 'converted'))
 );
 
+CREATE TABLE payments (
+    id TEXT PRIMARY KEY,
+    item_id TEXT NOT NULL REFERENCES items(id),
+    customer_phone TEXT NOT NULL,
+    amount REAL NOT NULL,
+    provider TEXT NOT NULL CHECK (provider IN ('mtn', 'airtel')),
+    transaction_id TEXT,
+    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'successful', 'failed')),
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+);
+
 CREATE INDEX idx_items_bale_id ON items(bale_id);
 CREATE INDEX idx_items_status ON items(status);
 CREATE INDEX idx_sales_item_id ON sales(item_id);

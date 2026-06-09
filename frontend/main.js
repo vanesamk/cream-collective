@@ -2,12 +2,32 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');
 }
 
-import { createIcons, PlusCircle, Package, ShoppingCart, BarChart3, Camera, Search, ChevronRight, Check, Loader2 } from 'lucide';
+import { createIcons, PlusCircle, Package, ShoppingCart, BarChart3, Camera, Search, ChevronRight, Check, Loader2, MessageCircle, Zap } from 'lucide';
 
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = '/api';
+let storeInfo = null;
+
+async function init() {
+  try {
+    const res = await fetch(`${API_BASE}/store/info`);
+    storeInfo = await res.json();
+  } catch (e) {
+    console.error("Failed to fetch store info", e);
+    // Fallback
+    storeInfo = {
+      name: "The Cream Collective",
+      tagline: "Premium Curated Fashion — Kampala",
+      phone: "+256774624210",
+      whatsapp: "https://wa.me/256774624210",
+      departments: ["Men", "Women", "Kids"]
+    };
+  }
+  navigate();
+}
 
 // Router
 const routes = {
+  'hero': renderHero,
   'catalog': renderCatalog,
   'inventory': renderInventory,
   'pos': renderPOS,
@@ -15,9 +35,13 @@ const routes = {
 };
 
 function navigate() {
-  const hash = window.location.hash.replace('#', '') || 'catalog';
+  const hash = window.location.hash.replace('#', '') || 'hero';
   const renderFn = routes[hash];
   
+  // Hide FAB by default on navigation
+  const fab = document.getElementById('whatsapp-fab');
+  if (fab) fab.style.display = 'none';
+
   // Update Nav
   document.querySelectorAll('.nav-item').forEach(el => {
     el.classList.toggle('active', el.dataset.page === hash);
@@ -27,12 +51,79 @@ function navigate() {
     const main = document.getElementById('main-content');
     main.innerHTML = '';
     renderFn(main);
-    createIcons({ icons: { PlusCircle, Package, ShoppingCart, BarChart3, Camera, Search, ChevronRight, Check, Loader2 } });
+    createIcons({ icons: { PlusCircle, Package, ShoppingCart, BarChart3, Camera, Search, ChevronRight, Check, Loader2, MessageCircle, Zap } });
   }
 }
 
+function updateWhatsAppFAB(sku) {
+  let fab = document.getElementById('whatsapp-fab');
+  if (!fab) {
+    fab = document.createElement('a');
+    fab.id = 'whatsapp-fab';
+    fab.target = '_blank';
+    fab.className = 'whatsapp-fab';
+    fab.style.cssText = `
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background: #25D366;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+      transition: all 0.3s ease;
+    `;
+    fab.innerHTML = '<i data-lucide="message-circle" style="width:20px; height:20px"></i> <span>Chat on WhatsApp</span>';
+    document.body.appendChild(fab);
+    createIcons({ icons: { MessageCircle } });
+  }
+  fab.href = `${storeInfo.whatsapp}?text=Hi%20${encodeURIComponent(storeInfo.name)}%2C%20I'm%20interested%20in%20${sku}`;
+  fab.style.display = 'flex';
+}
+
 window.addEventListener('hashchange', navigate);
-window.addEventListener('load', navigate);
+window.addEventListener('load', init);
+
+// --- Page 0: Hero Landing ---
+function renderHero(container) {
+  container.innerHTML = `
+    <div style="text-align:center; padding: 40px 20px; background: linear-gradient(135deg, #fdfbf7 0%, #fff 100%); min-height: 85vh; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #1a1a1a;">
+      <div style="margin-bottom: 32px;">
+        <h1 style="font-size: 2.8rem; font-weight: 900; margin: 0; letter-spacing: -1px; line-height: 1.1;">${storeInfo.name.toUpperCase()}</h1>
+        <p style="font-size: 1.2rem; color: #b89c7d; margin-top: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px;">${storeInfo.tagline}</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; width: 100%; max-width: 500px; margin-bottom: 40px;">
+        ${storeInfo.departments.map(dept => `
+          <div style="background: white; padding: 20px 10px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #f0f0f0;">
+            <div style="font-weight: 800; font-size: 0.9rem;">${dept.toUpperCase()}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <a href="${storeInfo.whatsapp}?text=Hi%20${encodeURIComponent(storeInfo.name)}%2C%20I'm%20interested%20in%20ordering%20from%20your%20latest%20collection." 
+         class="btn btn-primary" 
+         style="padding: 18px 40px; font-size: 1.1rem; display: flex; align-items: center; gap: 12px; border-radius: 50px; background: #1a1a1a; color: white; border: none; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+        Order on WhatsApp →
+      </a>
+
+      <div style="margin-top: 60px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+        <div style="background: #fff9e6; padding: 10px 20px; border-radius: 50px; display: flex; align-items: center; gap: 10px; border: 1px solid #ffeeba;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/a/af/MTN_Logo.svg" style="height: 18px;">
+          <span style="font-size: 0.85rem; font-weight: 700; color: #856404;">We accept MTN Mobile Money</span>
+        </div>
+        <p style="font-size: 0.85rem; color: #999;">Uganda's premium first-class fashion source.</p>
+      </div>
+    </div>
+  `;
+}
 
 // --- Page 1: Catalog ---
 async function renderCatalog(container) {
@@ -172,7 +263,7 @@ async function renderInventory(container) {
   const renderList = () => {
     const list = document.getElementById('inventory-list');
     list.innerHTML = items.map(item => `
-      <div class="item-card">
+      <div class="item-card" data-sku="${item.sku}" style="cursor:pointer">
         <img src="${JSON.parse(item.image_urls)[0]}" class="item-img">
         <div class="item-info">
           <div style="display:flex; justify-content:space-between">
@@ -182,9 +273,30 @@ async function renderInventory(container) {
           <div style="font-weight:700; margin: 4px 0">${item.category}</div>
           <div style="font-size:0.8rem; color:#666">${item.size}</div>
           <div class="item-price" style="margin-top:8px">${parseInt(item.price).toLocaleString()} UGX</div>
+          <a href="${storeInfo.whatsapp}?text=Hi%20${encodeURIComponent(storeInfo.name)}%2C%20I'm%20interested%20in%20${item.sku}" 
+             target="_blank"
+             style="display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; color:#25D366; font-weight:700; margin-top:8px; text-decoration:none">
+             <i data-lucide="message-circle" style="width:12px; height:12px"></i> Chat to Buy
+          </a>
         </div>
       </div>
     `).join('');
+
+    document.querySelectorAll('.item-card').forEach(card => {
+      card.onclick = (e) => {
+        // If it's a click on the link, don't trigger the card click
+        if (e.target.closest('a')) return;
+        
+        const sku = card.dataset.sku;
+        updateWhatsAppFAB(sku);
+        
+        // Visual feedback for selection
+        document.querySelectorAll('.item-card').forEach(c => c.style.border = 'none');
+        card.style.border = '2px solid #25D366';
+      };
+    });
+    
+    createIcons({ icons: { MessageCircle } });
   };
 
   container.innerHTML = `
@@ -210,6 +322,17 @@ async function renderInventory(container) {
 
 // --- Page 3: POS ---
 async function renderPOS(container) {
+  let payMethods = [];
+  try {
+    const res = await fetch(`${API_BASE}/payments/methods`);
+    const data = await res.json();
+    payMethods = data.methods;
+  } catch (e) {
+    payMethods = [{ name: "MTN Mobile Money", number: "+256774624210", type: "mobile_money" }, { name: "Cash", type: "cash" }];
+  }
+
+  const mmMethod = payMethods.find(m => m.type === 'mobile_money') || { number: '+256774624210' };
+
   container.innerHTML = `
     <div class="form-group" style="position:relative">
       <i data-lucide="search" style="position:absolute; left:12px; top:12px; width:20px; color:#aaa"></i>
@@ -226,20 +349,25 @@ async function renderPOS(container) {
       <div class="form-group">
         <label>Payment Method</label>
         <select id="payment-method">
-          <option>Cash</option><option>Mobile Money</option>
+          ${payMethods.map(m => `<option>${m.name}</option>`).join('')}
         </select>
       </div>
       <div id="mm-details" style="display:none">
-        <div class="form-group">
-          <label>Customer Phone (+256...)</label>
-          <input type="text" id="cust-phone" placeholder="+2567...">
+        <div style="background:#fff9e6; padding:12px; border-radius:8px; margin-bottom:16px; border:1px solid #ffeeba; font-size:0.85rem; color:#856404">
+          Send payment via MTN Mobile Money to <strong>${mmMethod.number}</strong>
         </div>
+        
         <div class="form-group">
-          <label>Transaction ID</label>
+          <label>Customer Phone (Optional)</label>
+          <input type="text" id="cust-phone" placeholder="07...">
+        </div>
+
+        <div class="form-group" id="manual-trans-group">
+          <label>Transaction Reference</label>
           <input type="text" id="trans-id" placeholder="Reference from SMS">
         </div>
       </div>
-      <button class="btn btn-primary" id="btn-complete-sale">Complete Sale</button>
+      <button class="btn btn-primary" id="btn-complete-sale">Record Sale</button>
     </div>
   `;
 
@@ -250,7 +378,10 @@ async function renderPOS(container) {
   const payMethod = document.getElementById('payment-method');
   let selectedItem = null;
 
-  payMethod.onchange = () => mmDetails.style.display = payMethod.value === 'Mobile Money' ? 'block' : 'none';
+  payMethod.onchange = () => {
+    mmDetails.style.display = payMethod.value.includes('Mobile Money') ? 'block' : 'none';
+    document.getElementById('btn-complete-sale').innerText = payMethod.value.includes('Mobile Money') ? 'Record Sale' : 'Complete Cash Sale';
+  };
 
   search.oninput = async () => {
     if (search.value.length < 3) return;
@@ -259,29 +390,80 @@ async function renderPOS(container) {
     selectedItem = items.find(i => i.sku.toLowerCase() === search.value.toLowerCase() && i.status === 'Available');
     if (selectedItem) {
       preview.innerHTML = `
-        <div class="card" style="display:flex; gap:16px">
-          <img src="${JSON.parse(selectedItem.image_urls)[0]}" style="width:80px; height:80px; border-radius:8px">
-          <div>
-            <div font-weight:800>${selectedItem.sku}</div>
-            <div style="font-size:0.9rem; color:var(--accent)">${parseInt(selectedItem.price).toLocaleString()} UGX</div>
+        <div class="card" style="display:flex; gap:16px; align-items:center">
+          <img src="${JSON.parse(selectedItem.image_urls)[0]}" style="width:80px; height:80px; border-radius:8px; object-fit:cover">
+          <div style="flex:1">
+            <div style="font-weight:800; font-size:1.1rem">${selectedItem.sku}</div>
+            <div style="font-size:0.9rem; color:var(--accent); font-weight:700">${parseInt(selectedItem.price).toLocaleString()} UGX</div>
+            <a href="${storeInfo.whatsapp}?text=Hi%20${encodeURIComponent(storeInfo.name)}%2C%20I'm%20interested%20in%20${selectedItem.sku}" 
+               target="_blank"
+               class="btn btn-secondary"
+               style="margin-top:8px; padding:6px 12px; font-size:0.75rem; background:#25D366; color:white; border:none; display:inline-flex; align-items:center; gap:6px">
+               <i data-lucide="message-circle" style="width:14px; height:14px"></i> WhatsApp Customer
+            </a>
           </div>
         </div>
       `;
       checkout.style.display = 'block';
+      createIcons({ icons: { MessageCircle } });
+      updateWhatsAppFAB(selectedItem.sku);
     } else {
       preview.innerHTML = '';
       checkout.style.display = 'none';
+      const fab = document.getElementById('whatsapp-fab');
+      if (fab) fab.style.display = 'none';
     }
   };
 
+  const showSuccess = (saleData) => {
+    const item = selectedItem;
+    const shareText = `*The Cream Collective*\n🛍️ Item: ${item.category} (${item.sku})\n📏 Size: ${item.size}\n💰 Price: ${parseInt(item.price).toLocaleString()} UGX\n✅ Status: Sold\n\nThank you for shopping with us! ✨`;
+
+    container.innerHTML = `
+      <div class="card" style="text-align:center; padding:40px">
+        <i data-lucide="check-circle" style="width:64px; height:64px; color:#319795; margin-bottom:16px"></i>
+        <h2 style="margin-bottom:8px">Sale Completed!</h2>
+        <p style="font-size:0.9rem; color:#666; margin-bottom:24px">Payment recorded via ${saleData.payment_method}</p>
+        
+        <div class="card" style="background:#f9f9f9; text-align:left; padding:12px; margin-bottom:24px">
+          <div style="font-size:0.75rem; color:#999; margin-bottom:4px">WhatsApp Share Text:</div>
+          <div id="share-content" style="font-size:0.85rem; white-space:pre-wrap; border:1px solid #eee; padding:8px; border-radius:4px; background:white">${shareText}</div>
+          <button class="btn btn-secondary" id="btn-copy-share" style="margin-top:8px; padding:8px; font-size:0.8rem">
+            <i data-lucide="copy" style="width:14px; height:14px; margin-right:4px; vertical-align:middle"></i> Copy Text
+          </button>
+        </div>
+
+        <button class="btn btn-primary" onclick="window.location.hash='#inventory'">Back to Inventory</button>
+      </div>
+    `;
+    
+    import('lucide').then(({ createIcons, CheckCircle, Copy }) => {
+      createIcons({ icons: { CheckCircle, Copy } });
+    });
+
+    document.getElementById('btn-copy-share').onclick = () => {
+      navigator.clipboard.writeText(shareText);
+      const btn = document.getElementById('btn-copy-share');
+      btn.innerText = 'Copied!';
+      setTimeout(() => btn.innerHTML = '<i data-lucide="copy" style="width:14px; height:14px; margin-right:4px; vertical-align:middle"></i> Copy Text', 2000);
+    };
+  };
+
   document.getElementById('btn-complete-sale').onclick = async () => {
+    let phone = document.getElementById('cust-phone').value.trim().replace('+', '');
+    if (phone) {
+      if (phone.startsWith('07')) {
+        phone = '256' + phone.substring(1);
+      }
+    }
+
     const data = {
       item_id: selectedItem.id,
       amount: selectedItem.price,
       channel: document.getElementById('sale-channel').value,
       payment_method: payMethod.value,
       transaction_id: document.getElementById('trans-id').value,
-      customer_phone: document.getElementById('cust-phone').value
+      customer_phone: phone
     };
     const res = await fetch(`${API_BASE}/sales`, {
       method: 'POST',
@@ -289,12 +471,7 @@ async function renderPOS(container) {
       body: JSON.stringify(data)
     });
     if (res.ok) {
-      container.innerHTML = `<div class="card" style="text-align:center; padding:40px">
-        <i data-lucide="check" style="width:64px; height:64px; color:#319795; margin-bottom:16px"></i>
-        <h2>Sale Completed!</h2>
-        <button class="btn btn-secondary" onclick="window.location.hash='#inventory'">Back to Inventory</button>
-      </div>`;
-      createIcons({ icons: { Check } });
+      showSuccess(data);
     }
   };
 }
