@@ -91,35 +91,105 @@ function updateWhatsAppFAB(sku) {
 window.addEventListener('hashchange', navigate);
 window.addEventListener('load', init);
 
-// --- Page 0: Hero Landing ---
+// --- Page 0: Hero / Home Dashboard ---
 function renderHero(container) {
   container.innerHTML = `
-    <div style="text-align:center; padding: 40px 20px; background: linear-gradient(135deg, #fdfbf7 0%, #fff 100%); min-height: 85vh; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #1a1a1a;">
-      <div style="margin-bottom: 32px;">
-        <h1 style="font-size: 2.8rem; font-weight: 900; margin: 0; letter-spacing: -1px; line-height: 1.1;">${storeInfo.name.toUpperCase()}</h1>
-        <p style="font-size: 1.2rem; color: #b89c7d; margin-top: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px;">${storeInfo.tagline}</p>
+    <div style="padding: 0;">
+      <!-- Brand Header -->
+      <div style="text-align:center; padding: 30px 20px; background: linear-gradient(180deg, #fdfbf7 0%, #fff 100%); border-bottom: 1px solid #f0f0f0;">
+        <h1 style="font-size: 2rem; font-weight: 900; margin: 0; letter-spacing: -0.5px;">THE CREAM<br>COLLECTIVE</h1>
+        <p style="font-size: 0.85rem; color: #b89c7d; margin-top: 6px; font-weight: 600; letter-spacing: 1px;">${storeInfo.tagline}</p>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; width: 100%; max-width: 500px; margin-bottom: 40px;">
-        ${storeInfo.departments.map(dept => `
-          <div style="background: white; padding: 20px 10px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #f0f0f0;">
-            <div style="font-weight: 800; font-size: 0.9rem;">${dept.toUpperCase()}</div>
-          </div>
-        `).join('')}
-      </div>
-
-      <a href="${storeInfo.whatsapp}?text=Hi%20${encodeURIComponent(storeInfo.name)}%2C%20I'm%20interested%20in%20ordering%20from%20your%20latest%20collection." 
-         class="btn btn-primary" 
-         style="padding: 18px 40px; font-size: 1.1rem; display: flex; align-items: center; gap: 12px; border-radius: 50px; background: #1a1a1a; color: white; border: none; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
-        Order on WhatsApp →
-      </a>
-
-      <div style="margin-top: 60px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
-        <div style="background: #fff9e6; padding: 10px 20px; border-radius: 50px; display: flex; align-items: center; gap: 10px; border: 1px solid #ffeeba;">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/a/af/MTN_Logo.svg" style="height: 18px;">
-          <span style="font-size: 0.85rem; font-weight: 700; color: #856404;">We accept MTN Mobile Money</span>
+      <!-- WhatsApp & Contact Bar -->
+      <div style="padding: 16px 20px; background: #075e54; display: flex; align-items: center; justify-content: space-between;">
+        <div style="color: white; font-size: 0.85rem; font-weight: 600;">
+          <div>Chat with us on WhatsApp</div>
+          <div style="font-size: 0.75rem; opacity: 0.8;">+256 774 624 210</div>
         </div>
-        <p style="font-size: 0.85rem; color: #999;">Uganda's premium first-class fashion source.</p>
+        <a href="${storeInfo.whatsapp}?text=Hi%20The%20Cream%20Collective%2C%20I'd%20like%20to%20place%20an%20order!" 
+           target="_blank"
+           style="background: #25D366; color: white; padding: 10px 20px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Order Now
+        </a>
+      </div>
+
+      <!-- Quick Stats -->
+      <div style="padding: 20px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+        <div style="background: white; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #f0f0f0;">
+          <div style="font-size: 0.6rem; color: #999; font-weight: 700; text-transform: uppercase;">Depts</div>
+          <div style="font-size: 1.1rem; font-weight: 800; margin-top: 4px;">${storeInfo.departments.length}</div>
+          <div style="font-size: 0.6rem; color: #999;">Men · Women · Kids</div>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #f0f0f0;">
+          <div style="font-size: 0.6rem; color: #999; font-weight: 700; text-transform: uppercase;">Payment</div>
+          <div style="font-size: 1.1rem; font-weight: 800; margin-top: 4px; color: #d4af37;">MTN</div>
+          <div style="font-size: 0.6rem; color: #999;">Mobile Money</div>
+        </div>
+        <div style="background: white; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #f0f0f0;">
+          <div style="font-size: 0.6rem; color: #999; font-weight: 700; text-transform: uppercase;">Contact</div>
+          <div style="font-size: 1.1rem; font-weight: 800; margin-top: 4px;">WhatsApp</div>
+          <div style="font-size: 0.6rem; color: #999;">+256 774 624 210</div>
+        </div>
+      </div>
+
+      <!-- How to Add Items Guide -->
+      <div style="padding: 0 20px 20px;">
+        <h2 style="font-size: 1rem; font-weight: 800; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 2px solid #1a1a1a; display: inline-block;">ADDING NEW ITEMS</h2>
+        
+        <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #f0f0f0;">
+          <div style="font-weight: 800; font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+            <span style="background: #1a1a1a; color: white; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem;">1</span>
+            Start a New Bale
+          </div>
+          <div style="font-size: 0.8rem; color: #666; line-height: 1.5; padding-left: 30px;">
+            Go to <strong>Catalog</strong> (bottom nav). Select <strong>"+ Start New Bale"</strong>, choose <strong>type</strong> (Cream/First-Class), <strong>department</strong> (Men/Women/Kids), enter the <strong>bale cost in UGX</strong>, and tap <strong>Confirm Bale</strong>.
+          </div>
+        </div>
+
+        <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #f0f0f0;">
+          <div style="font-weight: 800; font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+            <span style="background: #1a1a1a; color: white; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem;">2</span>
+            Add Item Details
+          </div>
+          <div style="font-size: 0.8rem; color: #666; line-height: 1.5; padding-left: 30px;">
+            Select the active bale. Choose <strong>Category</strong> (Dress, T-shirt, Jeans, etc.), enter <strong>Size</strong> (e.g. M, 32, 4-5Y), and <strong>Price in UGX</strong>. Take a <strong>photo</strong> of the item. Tap <strong>List Item</strong> — the system auto-generates a unique SKU like <code style="background:#eee;padding:2px 6px;border-radius:4px;font-size:0.75rem;">CEF6-DRE-001</code>.
+          </div>
+        </div>
+
+        <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #f0f0f0;">
+          <div style="font-weight: 800; font-size: 0.85rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+            <span style="background: #1a1a1a; color: white; width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem;">3</span>
+            Repeat for Every Item
+          </div>
+          <div style="font-size: 0.8rem; color: #666; line-height: 1.5; padding-left: 30px;">
+            The form clears after each item so you can rapidly add items one after another. The session counter shows how many items you've added. <strong>Tip:</strong> Sort items by category first — do all dresses, then all shirts, for faster entry.
+          </div>
+        </div>
+
+        <div style="background: #fff9e6; border-radius: 12px; padding: 14px; border: 1px solid #ffeeba; margin-top: 16px;">
+          <div style="font-size: 0.8rem; color: #856404; font-weight: 700; margin-bottom: 4px;">💡 Pro Tip</div>
+          <div style="font-size: 0.8rem; color: #856404; line-height: 1.4;">
+            After listing items, use <strong>Inventory</strong> to view all available stock. Use <strong>POS</strong> when a customer buys an item. Check <strong>Stats</strong> to see which bales are performing best.
+          </div>
+        </div>
+      </div>
+
+      <!-- MTN Payment Info -->
+      <div style="padding: 16px 20px; background: #fdfbf7; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="background: #ffc107; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.7rem; color: #856404;">MTN</div>
+          <div>
+            <div style="font-weight: 700; font-size: 0.85rem;">MTN Mobile Money</div>
+            <div style="font-size: 0.75rem; color: #666;">Send payments to: <strong>+256 774 624 210</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="text-align: center; padding: 20px; font-size: 0.7rem; color: #bbb;">
+        The Cream Collective © ${new Date().getFullYear()} — Kampala, Uganda
       </div>
     </div>
   `;
